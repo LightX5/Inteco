@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OAU Intenco — Campus Internet Cards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">OAU<span>Intenco</span></a>
+      <a href="admin.html" class="nav-link">Admin <span class="arrow">→</span></a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-tag">🟢 Cards available now</div>
+    <h1 class="hero-title">Campus internet,<br /><em>instantly.</em></h1>
+    <p class="hero-sub">Buy your Intenco card online. Pay once, get your login ID and password on screen — no queues, no stress.</p>
+    <a href="#plans" class="cta-btn">See plans ↓</a>
+  </section>
+
+  <section class="plans-section" id="plans">
+    <h2 class="section-title">Choose your plan</h2>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-header">
+          <div class="plan-icon">⚡</div>
+          <div>
+            <div class="plan-name">Quick</div>
+            <div class="plan-duration">4 hours access</div>
+          </div>
+        </div>
+        <div class="plan-price">₦100</div>
+        <ul class="plan-perks">
+          <li>✓ Full OAU network</li>
+          <li>✓ Instant delivery</li>
+          <li>✓ Great for quick browsing</li>
+        </ul>
+        <button class="plan-btn" onclick="openModal('quick', 100, '4 hours')">Buy now</button>
+      </div>
+
+      <div class="plan-card plan-card--featured">
+        <div class="plan-badge">Most popular</div>
+        <div class="plan-header">
+          <div class="plan-icon">🔥</div>
+          <div>
+            <div class="plan-name">Full Day</div>
+            <div class="plan-duration">24 hours access</div>
+          </div>
+        </div>
+        <div class="plan-price">₦500</div>
+        <ul class="plan-perks">
+          <li>✓ Full OAU network</li>
+          <li>✓ Instant delivery</li>
+          <li>✓ Stream, download, study all day</li>
+        </ul>
+        <button class="plan-btn plan-btn--featured" onclick="openModal('fullday', 500, '24 hours')">Buy now</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-section">
+    <h2 class="section-title">How it works</h2>
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-text"><strong>Pick a plan</strong><span>Choose 4-hour or 24-hour access.</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-text"><strong>Transfer payment</strong><span>Send to Opay — 07047555091 (Iyanuoluwa Olabisi).</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-text"><strong>Submit your order</strong><span>Fill in your name and transfer reference.</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-text"><strong>Get your card</strong><span>Your ID & password appear once payment is confirmed.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="payment-section">
+    <h2 class="section-title">Payment details</h2>
+    <div class="payment-box">
+      <div class="payment-row"><span class="payment-label">Bank</span><span class="payment-value">Opay</span></div>
+      <div class="payment-row"><span class="payment-label">Account number</span><span class="payment-value acct">07047555091</span></div>
+      <div class="payment-row"><span class="payment-label">Account name</span><span class="payment-value">Iyanuoluwa Olabisi</span></div>
+    </div>
+    <p class="payment-note">⚠️ Always send the <strong>exact amount</strong> and save your reference before placing your order.</p>
+  </section>
+
+  <section class="contact-section">
+    <div class="contact-box">
+      <div class="contact-icon">💬</div>
+      <div>
+        <div class="contact-title">Need help?</div>
+        <div class="contact-sub">WhatsApp us — <a href="https://wa.me/2347047555091" target="_blank">07047555091</a></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>OAU Intenco &mdash; Obafemi Awolowo University, Ile-Ife &copy; 2025</p>
+  </footer>
+
+  <!-- ORDER MODAL -->
+  <div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h2 class="modal-title">Place your order</h2>
+      <div class="modal-plan-info" id="modal-plan-info"></div>
+      <div class="form-group"><label>Full name</label><input type="text" id="f-name" placeholder="e.g. Tunde Adeyemi" /></div>
+      <div class="form-group"><label>Phone number</label><input type="tel" id="f-phone" placeholder="e.g. 08012345678" /></div>
+      <div class="form-group">
+        <label>Payment receipt <span style="color:#16a34a;font-weight:500">(screenshot from Opay)</span></label>
+        <div class="upload-box" id="upload-box" onclick="document.getElementById('f-receipt').click()">
+          <div class="upload-icon">📎</div>
+          <div class="upload-text">Tap to upload your receipt screenshot</div>
+          <div class="upload-sub">JPG, PNG — max 5MB</div>
+        </div>
+        <input type="file" id="f-receipt" accept="image/*" style="display:none" onchange="previewReceipt(event)" />
+        <div id="receipt-preview" style="display:none;margin-top:10px">
+          <img id="preview-img" style="width:100%;border-radius:8px;border:1px solid #e5e7e0;max-height:200px;object-fit:cover" />
+          <button type="button" onclick="clearReceipt()" style="margin-top:6px;font-size:12px;color:#dc2626;background:none;border:none;cursor:pointer">✕ Remove</button>
+        </div>
+      </div>
+      <div class="form-error" id="form-error"></div>
+      <button class="submit-btn" id="submit-btn" onclick="submitOrder()">Submit order →</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS MODAL -->
+  <div class="modal-overlay" id="success-modal">
+    <div class="modal modal--success">
+      <div class="success-icon">✓</div>
+      <h2 class="modal-title">Order received!</h2>
+      <p class="success-msg">Your payment is being verified. Once confirmed, your card details will appear here — usually within a few minutes.</p>
+      <div class="pending-notice">⏳ Sit tight! WhatsApp <a href="https://wa.me/2347047555091" target="_blank">07047555091</a> if it's taking too long.</div>
+      <div class="card-reveal" id="card-reveal" style="display:none">
+        <div class="card-reveal-inner">
+          <div class="card-reveal-row"><span>Card ID</span><strong id="reveal-id"></strong></div>
+          <div class="card-reveal-row"><span>Password</span><strong id="reveal-pw"></strong></div>
+        </div>
+        <p class="reveal-note">📸 Screenshot this — it won't show again.</p>
+      </div>
+      <button class="submit-btn" onclick="closeSuccess()" style="margin-top:1.5rem">Back to store</button>
+    </div>
+  </div>
+
+<script>
+  const SUPABASE_URL = 'https://afxrnnwactdrsmilijry.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmeHJubndhY3RkcnNtaWxpanJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0ODM4ODcsImV4cCI6MjA5NTA1OTg4N30.tVOq2oxigkL4jHbXjdIXOLUPBHEjo5F9ngpZz6XkbL4';
+
+  async function sb(path, options = {}) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': options.prefer || 'return=representation',
+        ...options.headers
+      },
+      ...options
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Request failed');
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  }
+
+  let selectedPlan = null;
+  let pendingOrderId = null;
+
+  function openModal(planKey, price, duration) {
+    selectedPlan = { key: planKey, price, duration };
+    document.getElementById('modal-plan-info').innerHTML =
+      `<strong>${price === 100 ? '4-hour' : '24-hour'} card — ₦${price}</strong><br>
+       Send ₦${price} to Opay <strong>07047555091</strong> (Iyanuoluwa Olabisi), then upload your receipt below.`;
+    document.getElementById('modal').classList.add('active');
+    document.getElementById('form-error').textContent = '';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function closeModalOutside(e) {
+    if (e.target.id === 'modal') closeModal();
+  }
+
+  function previewReceipt(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('preview-img').src = e.target.result;
+      document.getElementById('receipt-preview').style.display = 'block';
+      document.getElementById('upload-box').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearReceipt() {
+    document.getElementById('f-receipt').value = '';
+    document.getElementById('receipt-preview').style.display = 'none';
+    document.getElementById('upload-box').style.display = 'flex';
+  }
+
+  async function uploadReceipt(file) {
+    const ext = file.name.split('.').pop();
+    const fileName = `receipt_${Date.now()}.${ext}`;
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/receipts/${fileName}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': file.type,
+        'x-upsert': 'true'
+      },
+      body: file
+    });
+    if (!res.ok) throw new Error('Failed to upload receipt');
+    return `${SUPABASE_URL}/storage/v1/object/public/receipts/${fileName}`;
+  }
+
+  async function submitOrder() {
+    const name    = document.getElementById('f-name').value.trim();
+    const phone   = document.getElementById('f-phone').value.trim();
+    const fileEl  = document.getElementById('f-receipt');
+    const errEl   = document.getElementById('form-error');
+    const btn     = document.getElementById('submit-btn');
+
+    if (!name || !phone) {
+      errEl.textContent = 'Please fill in your name and phone number.';
+      return;
+    }
+    if (!fileEl.files[0]) {
+      errEl.textContent = 'Please upload your payment receipt screenshot.';
+      return;
+    }
+
+    errEl.textContent = '';
+    btn.textContent = 'Uploading receipt…';
+    btn.disabled = true;
+
+    try {
+      const receiptUrl = await uploadReceipt(fileEl.files[0]);
+      btn.textContent = 'Submitting order…';
+      const result = await sb('orders', {
+        method: 'POST',
+        body: JSON.stringify({
+          name, phone,
+          ref: receiptUrl,
+          plan: selectedPlan.key,
+          price: selectedPlan.price,
+          duration: selectedPlan.duration,
+          status: 'pending'
+        })
+      });
+      pendingOrderId = result[0].id;
+      closeModal();
+      clearReceipt();
+      document.getElementById('f-name').value = '';
+      document.getElementById('f-phone').value = '';
+      document.getElementById('success-modal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    } catch (e) {
+      errEl.textContent = 'Something went wrong: ' + e.message + '. Please try again.';
+    } finally {
+      btn.textContent = 'Submit order →';
+      btn.disabled = false;
+    }
+  }
+
+  function closeSuccess() {
+    document.getElementById('success-modal').classList.remove('active');
+    document.getElementById('card-reveal').style.display = 'none';
+    pendingOrderId = null;
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('a[href="#plans"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('plans').scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>

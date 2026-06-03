@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — OAU Intenco</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">OAU<span>Intenco</span></a>
+      <span class="nav-admin-badge">Admin Panel</span>
+    </div>
+  </nav>
+
+  <!-- LOGIN -->
+  <div id="login-page" class="admin-login-page">
+    <div class="login-card">
+      <h2>Admin Login</h2>
+      <p class="login-sub">Enter your password to manage orders and cards.</p>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="admin-pw" placeholder="Enter password" onkeydown="if(event.key==='Enter') doLogin()" />
+      </div>
+      <div class="form-error" id="login-error"></div>
+      <button class="submit-btn" onclick="doLogin()">Login →</button>
+    </div>
+  </div>
+
+  <!-- PANEL -->
+  <div id="admin-panel" style="display:none">
+    <div class="admin-header">
+      <div class="admin-stats" id="stats-bar"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="logout-btn" onclick="loadAll()" title="Refresh">↻ Refresh</button>
+        <button class="logout-btn" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="atab atab--active" onclick="switchTab('orders', this)">Orders</button>
+      <button class="atab" onclick="switchTab('cards', this)">Card Stock</button>
+    </div>
+
+    <div id="tab-orders" class="tab-content">
+      <div id="orders-list"><div class="empty-state">Loading…</div></div>
+    </div>
+
+    <div id="tab-cards" class="tab-content" style="display:none">
+      <div class="card-add-form">
+        <h3>Add a card</h3>
+        <div class="card-add-row">
+          <div class="form-group"><label>Card ID</label><input type="text" id="new-id" placeholder="e.g. USR1234" /></div>
+          <div class="form-group"><label>Password</label><input type="text" id="new-pw" placeholder="e.g. PASS5678" /></div>
+          <div class="form-group">
+            <label>Plan</label>
+            <select id="new-plan">
+              <option value="quick">4hr — ₦100</option>
+              <option value="fullday">24hr — ₦500</option>
+            </select>
+          </div>
+          <button class="add-card-btn" onclick="addCard()">+ Add</button>
+        </div>
+        <div class="form-error" id="card-error"></div>
+      </div>
+
+      <!-- Bulk add -->
+      <div class="card-add-form" style="margin-top:1rem">
+        <h3>Bulk add cards</h3>
+        <p style="font-size:13px;color:#6b7280;margin-bottom:.75rem">One card per line in format: <code>CARD_ID,PASSWORD</code> — e.g. <code>USR001,PASS001</code></p>
+        <div class="form-group">
+          <label>Plan for all</label>
+          <select id="bulk-plan">
+            <option value="quick">4hr — ₦100</option>
+            <option value="fullday">24hr — ₦500</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <textarea id="bulk-text" placeholder="USR001,PASS001&#10;USR002,PASS002&#10;USR003,PASS003" style="min-height:120px"></textarea>
+        </div>
+        <div class="form-error" id="bulk-error"></div>
+        <button class="add-card-btn" onclick="bulkAddCards()">+ Bulk Add</button>
+      </div>
+
+      <div id="cards-list" style="margin-top:1.5rem"><div class="empty-state">Loading…</div></div>
+    </div>
+  </div>
+
+<script>
+  const SUPABASE_URL = 'https://afxrnnwactdrsmilijry.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmeHJubndhY3RkcnNtaWxpanJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0ODM4ODcsImV4cCI6MjA5NTA1OTg4N30.tVOq2oxigkL4jHbXjdIXOLUPBHEjo5F9ngpZz6XkbL4';
+  const ADMIN_PASSWORD = 'admin123'; // password
+
+  async function sb(path, options = {}) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': options.prefer || 'return=representation',
+        ...options.headers
+      },
+      ...options
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Request failed');
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  }
+
+  function doLogin() {
+    const pw = document.getElementById('admin-pw').value;
+    if (pw === ADMIN_PASSWORD) {
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      loadAll();
+    } else {
+      document.getElementById('login-error').textContent = 'Wrong password. Try again.';
+    }
+  }
+
+  function doLogout() {
+    document.getElementById('admin-panel').style.display = 'none';
+    document.getElementById('login-page').style.display = 'flex';
+    document.getElementById('admin-pw').value = '';
+  }
+
+  async function loadAll() {
+    await Promise.all([loadOrders(), loadCards()]);
+    renderStats();
+  }
+
+  let allOrders = [];
+  let allCards  = [];
+
+  async function loadOrders() {
+    try {
+      allOrders = await sb('orders?order=created_at.desc', { headers: { 'Prefer': '' } }) || [];
+      renderOrders();
+    } catch (e) { document.getElementById('orders-list').innerHTML = `<div class="empty-state">Error loading orders: ${e.message}</div>`; }
+  }
+
+  async function loadCards() {
+    try {
+      allCards = await sb('cards?order=created_at.desc', { headers: { 'Prefer': '' } }) || [];
+      renderCards();
+    } catch (e) { document.getElementById('cards-list').innerHTML = `<div class="empty-state">Error loading cards: ${e.message}</div>`; }
+  }
+
+  function renderStats() {
+    const pending  = allOrders.filter(o => o.status === 'pending').length;
+    const approved = allOrders.filter(o => o.status === 'approved').length;
+    const avail4   = allCards.filter(c => c.plan === 'quick'   && !c.used).length;
+    const avail24  = allCards.filter(c => c.plan === 'fullday' && !c.used).length;
+    document.getElementById('stats-bar').innerHTML = `
+      <div class="stat-pill stat-pill--warn">${pending} pending</div>
+      <div class="stat-pill stat-pill--ok">${approved} approved</div>
+      <div class="stat-pill">${avail4} × 4hr cards</div>
+      <div class="stat-pill">${avail24} × 24hr cards</div>`;
+  }
+
+  function renderOrders() {
+    const el = document.getElementById('orders-list');
+    if (!allOrders.length) { el.innerHTML = '<div class="empty-state">No orders yet.</div>'; return; }
+    el.innerHTML = `
+      <table class="admin-table">
+        <thead><tr><th>Name / Phone</th><th>Plan</th><th>Reference</th><th>Time</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          ${allOrders.map(o => `
+          <tr>
+            <td><div class="order-name">${o.name}</div><div class="order-phone">${o.phone}</div></td>
+            <td>${o.plan === 'quick' ? '4hr — ₦100' : '24hr — ₦500'}</td>
+            <td class="order-ref">
+              ${o.ref && o.ref.startsWith('http')
+                ? `<a href="${o.ref}" target="_blank"><img src="${o.ref}" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #e5e7e0;cursor:pointer" title="Click to view full receipt" /></a>`
+                : o.ref || '—'}
+            </td>
+            <td class="order-time">${new Date(o.created_at).toLocaleString()}</td>
+            <td><span class="status-tag status-${o.status}">${o.status}</span></td>
+            <td>
+              ${o.status === 'pending'
+                ? `<div class="action-row">
+                     <button class="action-btn action-approve" onclick="approveOrder('${o.id}', '${o.plan}')">Approve</button>
+                     <button class="action-btn action-reject"  onclick="rejectOrder('${o.id}')">Reject</button>
+                   </div>`
+                : o.status === 'approved'
+                  ? `<div class="card-assigned">ID: <strong>${o.card_id}</strong><br>PW: <strong>${o.card_pw}</strong></div>`
+                  : '—'}
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function renderCards() {
+    const el = document.getElementById('cards-list');
+    if (!allCards.length) { el.innerHTML = '<div class="empty-state">No cards added yet.</div>'; return; }
+    el.innerHTML = `
+      <table class="admin-table">
+        <thead><tr><th>Plan</th><th>Card ID</th><th>Password</th><th>Status</th><th>Delete</th></tr></thead>
+        <tbody>
+          ${allCards.map(c => `
+          <tr>
+            <td>${c.plan === 'quick' ? '4hr — ₦100' : '24hr — ₦500'}</td>
+            <td class="mono">${c.card_id}</td>
+            <td class="mono">${c.card_pw}</td>
+            <td><span class="status-tag ${c.used ? 'status-used' : 'status-approved'}">${c.used ? 'Used' : 'Available'}</span></td>
+            <td><button class="del-btn" onclick="deleteCard('${c.id}')">✕</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  async function approveOrder(orderId, plan) {
+    const card = allCards.find(c => c.plan === plan && !c.used);
+    if (!card) {
+      alert(`No available ${plan === 'quick' ? '4-hour' : '24-hour'} cards!\nGo to "Card Stock" and add more.`);
+      return;
+    }
+    try {
+      // Mark card as used
+      await sb(`cards?id=eq.${card.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ used: true }),
+        prefer: 'return=minimal'
+      });
+      // Update order with card details and approved status
+      await sb(`orders?id=eq.${orderId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'approved', card_id: card.card_id, card_pw: card.card_pw }),
+        prefer: 'return=minimal'
+      });
+      await loadAll();
+      alert(`✅ Approved!\n\nCard assigned:\nID: ${card.card_id}\nPassword: ${card.card_pw}\n\nThe student can now see their card details.`);
+    } catch (e) { alert('Error approving order: ' + e.message); }
+  }
+
+  async function rejectOrder(orderId) {
+    if (!confirm('Reject this order?')) return;
+    try {
+      await sb(`orders?id=eq.${orderId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'rejected' }),
+        prefer: 'return=minimal'
+      });
+      await loadAll();
+    } catch (e) { alert('Error: ' + e.message); }
+  }
+
+  async function addCard() {
+    const card_id = document.getElementById('new-id').value.trim();
+    const card_pw = document.getElementById('new-pw').value.trim();
+    const plan    = document.getElementById('new-plan').value;
+    const errEl   = document.getElementById('card-error');
+    if (!card_id || !card_pw) { errEl.textContent = 'Both Card ID and Password are required.'; return; }
+    errEl.textContent = '';
+    try {
+      await sb('cards', { method: 'POST', body: JSON.stringify({ card_id, card_pw, plan, used: false }) });
+      document.getElementById('new-id').value = '';
+      document.getElementById('new-pw').value = '';
+      await loadAll();
+    } catch (e) { errEl.textContent = 'Error adding card: ' + e.message; }
+  }
+
+  async function bulkAddCards() {
+    const text  = document.getElementById('bulk-text').value.trim();
+    const plan  = document.getElementById('bulk-plan').value;
+    const errEl = document.getElementById('bulk-error');
+    if (!text) { errEl.textContent = 'Paste your cards first.'; return; }
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const cards = [];
+    for (const line of lines) {
+      const parts = line.split(',');
+      if (parts.length < 2) { errEl.textContent = `Invalid line: "${line}". Format must be CARD_ID,PASSWORD`; return; }
+      cards.push({ card_id: parts[0].trim(), card_pw: parts[1].trim(), plan, used: false });
+    }
+    errEl.textContent = '';
+    try {
+      await sb('cards', { method: 'POST', body: JSON.stringify(cards) });
+      document.getElementById('bulk-text').value = '';
+      await loadAll();
+      alert(`✅ Added ${cards.length} cards successfully!`);
+    } catch (e) { errEl.textContent = 'Error: ' + e.message; }
+  }
+
+  async function deleteCard(id) {
+    if (!confirm('Delete this card?')) return;
+    try {
+      await sb(`cards?id=eq.${id}`, { method: 'DELETE', prefer: 'return=minimal' });
+      await loadAll();
+    } catch (e) { alert('Error: ' + e.message); }
+  }
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.atab').forEach(t => t.classList.remove('atab--active'));
+    btn.classList.add('atab--active');
+    document.getElementById('tab-orders').style.display = tab === 'orders' ? 'block' : 'none';
+    document.getElementById('tab-cards').style.display  = tab === 'cards'  ? 'block' : 'none';
+  }
+
+  // Auto-refresh every 30 seconds when logged in
+  setInterval(() => {
+    if (document.getElementById('admin-panel').style.display !== 'none') loadAll();
+  }, 30000);
+</script>
+</body>
+</html>
